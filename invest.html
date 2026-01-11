@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Inversión | Cripto Inversiones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-logo">💰 Cripto Inversiones</div>
+            <div class="dashboard-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+                <button class="btn btn-outline btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul class="nav-list">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="invest.html" class="active">Nueva Inversión</a></li>
+                <li><a href="portfolio.html">Mi Portafolio</a></li>
+                <li><a href="#" onclick="showProfile()">Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="dashboard-content">
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="progress-step active" id="step1Indicator">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Seleccionar Activo</div>
+                </div>
+                <div class="progress-step" id="step2Indicator">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Monto a Invertir</div>
+                </div>
+                <div class="progress-step" id="step3Indicator">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Confirmar y Pagar</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Select Asset -->
+            <div id="step1" class="investment-step active">
+                <div class="content-card">
+                    <h2>Paso 1: Selecciona el Activo para Invertir</h2>
+                    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                        Elige el activo en el que deseas invertir. Cada opción tiene diferentes retornos esperados y plazos.
+                    </p>
+
+                    <div class="asset-selection-grid" id="assetGrid">
+                        <!-- Assets will be loaded here -->
+                    </div>
+
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary btn-large" onclick="goToStep2()" id="continueStep1" disabled>
+                            Continuar →
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Enter Amount -->
+            <div id="step2" class="investment-step" style="display: none;">
+                <div class="content-card">
+                    <h2>Paso 2: ¿Cuánto Deseas Invertir?</h2>
+                    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                        Ingresa el monto que deseas invertir en <span id="selectedAssetName">este activo</span>.
+                    </p>
+
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <!-- Asset Summary -->
+                        <div class="payment-summary">
+                            <div class="summary-row">
+                                <span class="summary-label">Activo Seleccionado:</span>
+                                <span class="summary-value" id="summaryAssetName">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Retorno Esperado:</span>
+                                <span class="summary-value" id="summaryReturn">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Duración:</span>
+                                <span class="summary-value" id="summaryDuration">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Inversión Mínima:</span>
+                                <span class="summary-value" id="summaryMinInvestment">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Amount Input -->
+                        <div class="form-group">
+                            <label>Selecciona Criptomoneda</label>
+                            <div class="crypto-selector" id="cryptoSelector">
+                                <!-- Crypto options will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Monto a Invertir</label>
+                            <input type="number"
+                                   id="investmentAmount"
+                                   step="0.00000001"
+                                   placeholder="0.00"
+                                   oninput="calculateInvestment()">
+                            <div style="margin-top: 0.5rem;">
+                                <span id="cryptoSymbol" style="color: var(--primary-gold); font-weight: 600;">BTC</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Equivalente en USD</label>
+                            <input type="number"
+                                   id="investmentAmountUSD"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   oninput="calculateFromUSD()"
+                                   readonly
+                                   style="background: rgba(255, 215, 0, 0.05);">
+                            <p style="font-size: 0.875rem; color: var(--text-gray); margin-top: 0.5rem;">
+                                Precio actual: <span id="currentPrice">$0</span> por <span id="currentCrypto">BTC</span>
+                            </p>
+                        </div>
+
+                        <!-- Expected Returns -->
+                        <div class="payment-summary" style="background: rgba(0, 255, 136, 0.05); border-color: var(--success-green);">
+                            <h3 style="color: var(--success-green); margin-bottom: 1rem;">Retornos Proyectados</h3>
+                            <div class="summary-row">
+                                <span class="summary-label">Inversión Total:</span>
+                                <span class="summary-value" id="projectedInvestment">$0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Retorno Mensual Estimado:</span>
+                                <span class="summary-value" id="projectedMonthly">$0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Retorno Total al Vencimiento:</span>
+                                <span class="summary-value" style="color: var(--success-green);" id="projectedTotal">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                            <button class="btn btn-secondary" onclick="goToStep1()">
+                                ← Volver
+                            </button>
+                            <button class="btn btn-primary btn-large" onclick="goToStep3()" id="continueStep2" disabled>
+                                Continuar al Pago →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div id="step3" class="investment-step" style="display: none;">
+                <div class="content-card">
+                    <h2>Paso 3: Confirma tu Inversión</h2>
+                    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                        Revisa los detalles y procede al pago.
+                    </p>
+
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div class="payment-summary">
+                            <h3 style="margin-bottom: 1rem;">Resumen de Inversión</h3>
+                            <div class="summary-row">
+                                <span class="summary-label">Activo:</span>
+                                <span class="summary-value" id="finalAssetName">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Monto:</span>
+                                <span class="summary-value">
+                                    <span id="finalAmount">0</span> <span id="finalCrypto">BTC</span>
+                                </span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Equivalente USD:</span>
+                                <span class="summary-value" id="finalUSD">$0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Retorno Esperado:</span>
+                                <span class="summary-value" id="finalReturn">0%</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Duración:</span>
+                                <span class="summary-value" id="finalDuration">0 meses</span>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin: 2rem 0;">
+                            <button class="btn btn-primary btn-large" onclick="proceedToPayment()">
+                                💳 Proceder al Pago
+                            </button>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <button class="btn btn-outline" onclick="goToStep2()">
+                                ← Volver a Editar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="content-card" style="background: rgba(255, 68, 68, 0.05); border-color: var(--danger-red); margin-top: 2rem;">
+                    <h3 style="color: var(--danger-red);">⚠️ Advertencia de Riesgo</h3>
+                    <p style="color: var(--text-gray); line-height: 1.7; font-size: 0.875rem;">
+                        Esta inversión conlleva riesgos significativos. Los retornos proyectados son estimaciones basadas en rendimientos históricos y NO garantizan resultados futuros. Puedes perder parte o la totalidad de tu inversión. Solo invierte dinero que puedas permitirte perder. Al proceder, confirmas que entiendes y aceptas estos riesgos.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let selectedAsset = null;
+        let selectedCrypto = 'BTC';
+        let currentStep = 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+                loadAssets();
+                loadCryptoOptions();
+            }
+        });
+
+        function loadAssets() {
+            const grid = document.getElementById('assetGrid');
+            grid.innerHTML = Object.values(AVAILABLE_ASSETS).map(asset => `
+                <div class="asset-select-card" onclick="selectAsset('${asset.id}')">
+                    <div class="asset-select-icon">${asset.icon}</div>
+                    <h3>${asset.name}</h3>
+                    <p>${asset.description}</p>
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 215, 0, 0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-gray); font-size: 0.875rem;">Retorno:</span>
+                            <strong style="color: var(--success-green);">${asset.expectedReturn}% anual</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-gray); font-size: 0.875rem;">Duración:</span>
+                            <strong>${asset.duration} meses</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-gray); font-size: 0.875rem;">Mínimo:</span>
+                            <strong>${asset.minInvestment} BTC</strong>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadCryptoOptions() {
+            const selector = document.getElementById('cryptoSelector');
+            selector.innerHTML = Object.values(CRYPTO_CONFIG).map(crypto => `
+                <div class="crypto-option" onclick="selectCrypto('${crypto.symbol}')">
+                    <div class="crypto-icon">${crypto.icon}</div>
+                    <div class="crypto-name">${crypto.name}</div>
+                    <div class="crypto-symbol">${crypto.symbol}</div>
+                </div>
+            `).join('');
+
+            // Select first crypto by default
+            selectCrypto('BTC');
+        }
+
+        function selectAsset(assetId) {
+            selectedAsset = assetId;
+
+            // Update UI
+            document.querySelectorAll('.asset-select-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            document.getElementById('continueStep1').disabled = false;
+        }
+
+        function selectCrypto(symbol) {
+            selectedCrypto = symbol;
+
+            // Update UI
+            document.querySelectorAll('.crypto-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            document.getElementById('cryptoSymbol').textContent = symbol;
+            document.getElementById('currentCrypto').textContent = symbol;
+            document.getElementById('currentPrice').textContent = formatCurrency(CRYPTO_CONFIG[symbol].currentPrice);
+
+            calculateInvestment();
+        }
+
+        function goToStep2() {
+            if (!selectedAsset) {
+                showNotification('Por favor selecciona un activo', 'error');
+                return;
+            }
+
+            const asset = AVAILABLE_ASSETS[selectedAsset];
+
+            // Update summary
+            document.getElementById('summaryAssetName').textContent = asset.name;
+            document.getElementById('summaryReturn').textContent = asset.expectedReturn + '% anual';
+            document.getElementById('summaryDuration').textContent = asset.duration + ' meses';
+            document.getElementById('summaryMinInvestment').textContent = asset.minInvestment + ' BTC';
+            document.getElementById('selectedAssetName').textContent = asset.name;
+
+            // Show step 2
+            showStep(2);
+        }
+
+        function goToStep1() {
+            showStep(1);
+        }
+
+        function goToStep3() {
+            const amount = parseFloat(document.getElementById('investmentAmount').value);
+            const asset = AVAILABLE_ASSETS[selectedAsset];
+
+            if (!amount || amount < asset.minInvestment) {
+                showNotification(`El monto mínimo es ${asset.minInvestment} ${selectedCrypto}`, 'error');
+                return;
+            }
+
+            // Update final summary
+            const usdAmount = calculateUSDAmount(amount, selectedCrypto);
+            document.getElementById('finalAssetName').textContent = asset.name;
+            document.getElementById('finalAmount').textContent = amount.toFixed(8);
+            document.getElementById('finalCrypto').textContent = selectedCrypto;
+            document.getElementById('finalUSD').textContent = formatCurrency(usdAmount);
+            document.getElementById('finalReturn').textContent = asset.expectedReturn + '% anual';
+            document.getElementById('finalDuration').textContent = asset.duration + ' meses';
+
+            showStep(3);
+        }
+
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.investment-step').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.progress-step').forEach(s => s.classList.remove('active', 'completed'));
+
+            // Show current step
+            document.getElementById(`step${step}`).style.display = 'block';
+            document.getElementById(`step${step}Indicator`).classList.add('active');
+
+            // Mark previous steps as completed
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step${i}Indicator`).classList.add('completed');
+            }
+
+            currentStep = step;
+        }
+
+        function calculateInvestment() {
+            const amount = parseFloat(document.getElementById('investmentAmount').value) || 0;
+            const asset = AVAILABLE_ASSETS[selectedAsset];
+
+            if (!asset) return;
+
+            const usdAmount = calculateUSDAmount(amount, selectedCrypto);
+            document.getElementById('investmentAmountUSD').value = usdAmount.toFixed(2);
+
+            // Calculate projections
+            const monthlyReturn = (usdAmount * (asset.expectedReturn / 12 / 100));
+            const totalReturn = usdAmount * (asset.expectedReturn / 100);
+
+            document.getElementById('projectedInvestment').textContent = formatCurrency(usdAmount);
+            document.getElementById('projectedMonthly').textContent = formatCurrency(monthlyReturn);
+            document.getElementById('projectedTotal').textContent = formatCurrency(usdAmount + totalReturn);
+
+            // Enable continue button if amount is sufficient
+            document.getElementById('continueStep2').disabled = amount < asset.minInvestment;
+        }
+
+        function calculateFromUSD() {
+            const usdAmount = parseFloat(document.getElementById('investmentAmountUSD').value) || 0;
+            const cryptoAmount = calculateCryptoAmount(usdAmount, selectedCrypto);
+            document.getElementById('investmentAmount').value = cryptoAmount;
+            calculateInvestment();
+        }
+
+        function proceedToPayment() {
+            const amount = parseFloat(document.getElementById('investmentAmount').value);
+            const usdAmount = calculateUSDAmount(amount, selectedCrypto);
+
+            // Store investment data in sessionStorage
+            sessionStorage.setItem('pendingInvestment', JSON.stringify({
+                assetId: selectedAsset,
+                cryptoType: selectedCrypto,
+                amountCrypto: amount,
+                amountUSD: usdAmount
+            }));
+
+            // Redirect to payment page
+            window.location.href = 'payment.html';
+        }
+
+        function showProfile() {
+            showNotification('Función de perfil en desarrollo', 'info');
+        }
+    </script>
+</body>
+</html>

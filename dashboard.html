@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Panel de Inversiones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-logo">💰 Cripto Inversiones</div>
+            <div class="dashboard-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+                <button class="btn btn-outline btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul class="nav-list">
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="invest.html">Nueva Inversión</a></li>
+                <li><a href="portfolio.html">Mi Portafolio</a></li>
+                <li><a href="#" onclick="showProfile()">Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="dashboard-content">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Capital Total Invertido</span>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="stat-value" id="totalInvested">$0.00</div>
+                    <div class="stat-change positive">
+                        <span id="totalInvestedCrypto">0 BTC</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Retorno Total</span>
+                        <span class="stat-icon">📈</span>
+                    </div>
+                    <div class="stat-value" id="totalReturns">$0.00</div>
+                    <div class="stat-change positive" id="returnsPercentage">+0%</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Inversiones Activas</span>
+                        <span class="stat-icon">⚡</span>
+                    </div>
+                    <div class="stat-value" id="activeInvestments">0</div>
+                    <div class="stat-change">Actualmente en operación</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Próximo Pago</span>
+                        <span class="stat-icon">📅</span>
+                    </div>
+                    <div class="stat-value" id="nextPayment" style="font-size: 1.5rem;">--</div>
+                    <div class="stat-change" id="nextPaymentAmount">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="content-card">
+                <h2>Acciones Rápidas</h2>
+                <div class="cta-group">
+                    <a href="invest.html" class="btn btn-primary">
+                        💎 Nueva Inversión
+                    </a>
+                    <a href="portfolio.html" class="btn btn-secondary">
+                        📊 Ver Portafolio Completo
+                    </a>
+                    <a href="#" onclick="requestWithdrawal()" class="btn btn-outline">
+                        💸 Solicitar Retiro
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Investments -->
+            <div class="content-card">
+                <h2>Inversiones Recientes</h2>
+                <div class="table-container">
+                    <table class="investment-table">
+                        <thead>
+                            <tr>
+                                <th>Activo</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                                <th>Retorno Esperado</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentInvestmentsTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">
+                                    Cargando inversiones...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Performance Chart Placeholder -->
+            <div class="content-card">
+                <h2>Rendimiento del Portafolio</h2>
+                <div style="padding: 2rem; text-align: center; color: var(--text-gray);">
+                    <p style="margin-bottom: 1rem;">📊 Gráfico de rendimiento histórico</p>
+                    <p style="font-size: 0.875rem;">Los gráficos se actualizarán con datos reales de tus inversiones</p>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="content-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--primary-gold);">
+                <h2>⚠️ Importante</h2>
+                <p style="color: var(--text-gray); line-height: 1.7;">
+                    Recuerda que todas las inversiones conllevan riesgos. Los retornos mostrados son estimaciones basadas en rendimientos históricos y no garantizan resultados futuros. Invierte solo lo que puedas permitirte perder.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sistema de Seguridad -->
+    <script src="security.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Load dashboard data
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user) {
+                loadDashboard(user);
+            }
+        });
+
+        function loadDashboard(user) {
+            // Set user info
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+
+            // Load investment data
+            const investments = getUserInvestments(user.id);
+            updateDashboardStats(investments);
+            displayRecentInvestments(investments);
+        }
+
+        function updateDashboardStats(investments) {
+            const activeInvestments = investments.filter(inv => inv.status === 'active');
+
+            // Calculate totals
+            let totalInvested = 0;
+            let totalReturns = 0;
+
+            activeInvestments.forEach(inv => {
+                totalInvested += inv.amountUSD;
+                totalReturns += calculateReturns(inv);
+            });
+
+            // Update UI
+            document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
+            document.getElementById('totalReturns').textContent = formatCurrency(totalReturns);
+            document.getElementById('activeInvestments').textContent = activeInvestments.length;
+
+            const returnsPercentage = totalInvested > 0 ? ((totalReturns / totalInvested) * 100).toFixed(2) : 0;
+            document.getElementById('returnsPercentage').textContent = `+${returnsPercentage}%`;
+
+            // Next payment
+            if (activeInvestments.length > 0) {
+                const nextInv = activeInvestments.sort((a, b) =>
+                    new Date(a.nextPaymentDate) - new Date(b.nextPaymentDate)
+                )[0];
+                document.getElementById('nextPayment').textContent = formatDate(nextInv.nextPaymentDate);
+                document.getElementById('nextPaymentAmount').textContent = formatCurrency(nextInv.monthlyReturn);
+            }
+        }
+
+        function displayRecentInvestments(investments) {
+            const tableBody = document.getElementById('recentInvestmentsTable');
+
+            if (investments.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💼</div>
+                                <h3>No tienes inversiones aún</h3>
+                                <p>Comienza tu viaje de inversión en activos reales</p>
+                                <a href="invest.html" class="btn btn-primary">Hacer Primera Inversión</a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const recent = investments.slice(0, 5);
+            tableBody.innerHTML = recent.map(inv => `
+                <tr>
+                    <td>
+                        <strong>${inv.assetName}</strong><br>
+                        <span style="font-size: 0.875rem; color: var(--text-gray);">${inv.assetType}</span>
+                    </td>
+                    <td>
+                        ${formatCurrency(inv.amountUSD)}<br>
+                        <span style="font-size: 0.875rem; color: var(--text-gray);">${inv.amountCrypto} ${inv.cryptoType}</span>
+                    </td>
+                    <td>${formatDate(inv.createdAt)}</td>
+                    <td>
+                        <strong style="color: var(--success-green);">${inv.expectedReturn}%</strong> anual
+                    </td>
+                    <td>
+                        <span class="status-badge status-${inv.status}">
+                            ${getStatusText(inv.status)}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showProfile() {
+            showNotification('Función de perfil en desarrollo', 'info');
+        }
+
+        function requestWithdrawal() {
+            showNotification('Para solicitar un retiro, contacta a soporte', 'info');
+        }
+    </script>
+</body>
+</html>

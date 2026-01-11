@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago - Inversión | Cripto Inversiones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-logo">💰 Cripto Inversiones</div>
+            <div class="dashboard-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+                <button class="btn btn-outline btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul class="nav-list">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="invest.html" class="active">Nueva Inversión</a></li>
+                <li><a href="portfolio.html">Mi Portafolio</a></li>
+                <li><a href="#" onclick="showProfile()">Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="dashboard-content">
+            <div class="payment-container">
+                <div class="content-card">
+                    <h2 style="text-align: center; margin-bottom: 1rem;">💳 Realiza tu Pago</h2>
+                    <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+                        Envía exactamente el monto indicado a la dirección de wallet mostrada
+                    </p>
+
+                    <!-- Payment Summary -->
+                    <div class="payment-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Activo:</span>
+                            <span class="summary-value" id="paymentAsset">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Criptomoneda:</span>
+                            <span class="summary-value">
+                                <span id="paymentCryptoName">-</span> (<span id="paymentCryptoSymbol">-</span>)
+                            </span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Monto a Enviar:</span>
+                            <span class="summary-value" style="font-size: 1.5rem; color: var(--primary-gold);">
+                                <span id="paymentAmount">0</span> <span id="paymentSymbol">BTC</span>
+                            </span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Equivalente USD:</span>
+                            <span class="summary-value" id="paymentUSD">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Red:</span>
+                            <span class="summary-value" id="paymentNetwork">-</span>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Section -->
+                    <div class="qr-container">
+                        <h3 style="color: #000; margin-bottom: 1rem;">Escanea el Código QR</h3>
+                        <div id="qrcode" class="qr-code"></div>
+                        <div class="wallet-address" id="walletAddress">Cargando dirección...</div>
+                        <button class="copy-button" onclick="copyAddress()">
+                            📋 Copiar Dirección
+                        </button>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="payment-instructions">
+                        <h3>📝 Instrucciones de Pago</h3>
+                        <ol>
+                            <li>Abre tu wallet de criptomonedas (ej: Trust Wallet, MetaMask, Binance, etc.)</li>
+                            <li>Selecciona "Enviar" o "Send" <strong><span id="instructionCrypto">BTC</span></strong></li>
+                            <li>Escanea el código QR o copia la dirección manualmente</li>
+                            <li><strong>IMPORTANTE:</strong> Verifica que la red sea <strong><span id="instructionNetwork">Bitcoin Network</span></strong></li>
+                            <li>Envía <strong>exactamente</strong> <strong><span id="instructionAmount">0</span> <span id="instructionSymbol">BTC</span></strong></li>
+                            <li>Confirma la transacción y espera la confirmación de la red</li>
+                            <li>Una vez enviado, copia el hash de transacción y pégalo abajo</li>
+                        </ol>
+                    </div>
+
+                    <!-- Transaction Hash Input -->
+                    <div class="content-card" style="background: rgba(0, 212, 255, 0.05); border-color: var(--accent-blue); margin-top: 2rem;">
+                        <h3 style="color: var(--accent-blue); margin-bottom: 1rem;">Confirmación de Transacción</h3>
+                        <div class="form-group">
+                            <label>Hash de Transacción (TX ID)</label>
+                            <input type="text"
+                                   id="transactionHash"
+                                   placeholder="0x... o hash de transacción"
+                                   style="font-family: 'Courier New', monospace; font-size: 0.875rem;">
+                            <p style="font-size: 0.875rem; color: var(--text-gray); margin-top: 0.5rem;">
+                                El hash es el identificador único de tu transacción. Lo encuentras en tu wallet después de enviar.
+                            </p>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="confirmPayment">
+                                <span>Confirmo que he enviado el monto exacto a la dirección indicada</span>
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary btn-full btn-large" onclick="confirmInvestment()" id="confirmButton">
+                            ✅ Confirmar Inversión
+                        </button>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="content-card" style="background: rgba(255, 68, 68, 0.05); border-color: var(--danger-red); margin-top: 2rem;">
+                        <h3 style="color: var(--danger-red);">⚠️ ADVERTENCIAS IMPORTANTES</h3>
+                        <ul style="color: var(--text-gray); line-height: 1.8; padding-left: 1.5rem;">
+                            <li><strong>Verifica la red:</strong> Enviar en la red incorrecta resultará en pérdida permanente de fondos</li>
+                            <li><strong>Monto exacto:</strong> Envía exactamente el monto indicado. Montos incorrectos pueden retrasar tu inversión</li>
+                            <li><strong>Sin reembolsos:</strong> Las transacciones de criptomonedas son irreversibles</li>
+                            <li><strong>Tiempo de confirmación:</strong> Las confirmaciones pueden tardar de 10 minutos a 1 hora dependiendo de la red</li>
+                            <li><strong>Guarda el hash:</strong> El hash de transacción es tu comprobante de pago</li>
+                        </ul>
+                    </div>
+
+                    <!-- Support -->
+                    <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 215, 0, 0.2);">
+                        <p style="color: var(--text-gray); margin-bottom: 1rem;">
+                            ¿Tienes problemas o preguntas?
+                        </p>
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="https://wa.me/58XXXXXXXXX" class="btn btn-outline" target="_blank">
+                                📱 WhatsApp Soporte
+                            </a>
+                            <a href="https://t.me/InversionesCriptoVE" class="btn btn-outline" target="_blank">
+                                ✈️ Telegram Soporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let investmentData = null;
+        let walletAddr = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+                loadPaymentData();
+            }
+        });
+
+        function loadPaymentData() {
+            // Get investment data from session
+            const data = sessionStorage.getItem('pendingInvestment');
+
+            if (!data) {
+                showNotification('No hay información de inversión. Redirigiendo...', 'error');
+                setTimeout(() => window.location.href = 'invest.html', 2000);
+                return;
+            }
+
+            investmentData = JSON.parse(data);
+            const asset = AVAILABLE_ASSETS[investmentData.assetId];
+            const crypto = CRYPTO_CONFIG[investmentData.cryptoType];
+
+            // Update UI
+            document.getElementById('paymentAsset').textContent = asset.name;
+            document.getElementById('paymentCryptoName').textContent = crypto.name;
+            document.getElementById('paymentCryptoSymbol').textContent = crypto.symbol;
+            document.getElementById('paymentAmount').textContent = investmentData.amountCrypto.toFixed(8);
+            document.getElementById('paymentSymbol').textContent = crypto.symbol;
+            document.getElementById('paymentUSD').textContent = formatCurrency(investmentData.amountUSD);
+            document.getElementById('paymentNetwork').textContent = crypto.network;
+
+            // Update instructions
+            document.getElementById('instructionCrypto').textContent = crypto.symbol;
+            document.getElementById('instructionNetwork').textContent = crypto.network;
+            document.getElementById('instructionAmount').textContent = investmentData.amountCrypto.toFixed(8);
+            document.getElementById('instructionSymbol').textContent = crypto.symbol;
+
+            // Get wallet address
+            walletAddr = WALLET_ADDRESSES[investmentData.cryptoType];
+            document.getElementById('walletAddress').textContent = walletAddr;
+
+            // Generate QR Code
+            generateQRCode(walletAddr);
+        }
+
+        function generateQRCode(address) {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = ''; // Clear previous QR
+
+            new QRCode(qrContainer, {
+                text: address,
+                width: 256,
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function copyAddress() {
+            navigator.clipboard.writeText(walletAddr).then(() => {
+                showNotification('✅ Dirección copiada al portapapeles', 'success');
+            }).catch(err => {
+                showNotification('Error al copiar. Copia manualmente.', 'error');
+            });
+        }
+
+        function confirmInvestment() {
+            const txHash = document.getElementById('transactionHash').value.trim();
+            const confirmed = document.getElementById('confirmPayment').checked;
+
+            if (!confirmed) {
+                showNotification('Debes confirmar que has enviado el pago', 'error');
+                return;
+            }
+
+            if (!txHash) {
+                showNotification('Por favor ingresa el hash de transacción', 'error');
+                return;
+            }
+
+            // Validate hash format (basic)
+            if (txHash.length < 20) {
+                showNotification('El hash de transacción parece inválido', 'error');
+                return;
+            }
+
+            const user = getCurrentUser();
+            if (!user) {
+                showNotification('Error: Usuario no encontrado', 'error');
+                return;
+            }
+
+            // Create investment
+            const button = document.getElementById('confirmButton');
+            button.disabled = true;
+            button.textContent = 'Procesando...';
+
+            try {
+                const investment = createInvestment(user.id, {
+                    ...investmentData,
+                    transactionHash: txHash
+                });
+
+                // Clear session
+                sessionStorage.removeItem('pendingInvestment');
+
+                showNotification('¡Inversión registrada exitosamente!', 'success');
+
+                // Show success message
+                setTimeout(() => {
+                    alert(`✅ INVERSIÓN REGISTRADA\n\n` +
+                          `Tu inversión ha sido registrada y está pendiente de confirmación.\n\n` +
+                          `ID de Inversión: ${investment.id}\n` +
+                          `Hash de Transacción: ${txHash}\n\n` +
+                          `Recibirás una notificación cuando se confirme tu pago.\n` +
+                          `Tiempo estimado: 1-24 horas dependiendo de la red.`);
+
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error creating investment:', error);
+                showNotification('Error al registrar inversión. Intenta nuevamente.', 'error');
+                button.disabled = false;
+                button.textContent = '✅ Confirmar Inversión';
+            }
+        }
+
+        function showProfile() {
+            showNotification('Función de perfil en desarrollo', 'info');
+        }
+    </script>
+</body>
+</html>

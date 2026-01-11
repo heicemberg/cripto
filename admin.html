@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin | Cripto Inversiones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-logo">🔧 Panel de Administración</div>
+            <div class="dashboard-user">
+                <button class="btn btn-outline btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul class="nav-list">
+                <li><a href="#" onclick="showSection('stats')" class="active">Estadísticas</a></li>
+                <li><a href="#" onclick="showSection('investments')">Inversiones</a></li>
+                <li><a href="#" onclick="showSection('users')">Usuarios</a></li>
+                <li><a href="#" onclick="showSection('config')">Configuración</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="dashboard-content">
+            <!-- Stats Section -->
+            <div id="statsSection" class="admin-section">
+                <div class="content-card">
+                    <h2>📊 Estadísticas Generales</h2>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Total Usuarios</span>
+                                <span class="stat-icon">👥</span>
+                            </div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Total Inversiones</span>
+                                <span class="stat-icon">💼</span>
+                            </div>
+                            <div class="stat-value" id="totalInvestments">0</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Capital Total</span>
+                                <span class="stat-icon">💰</span>
+                            </div>
+                            <div class="stat-value" id="totalCapital">$0.00</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Inversiones Pendientes</span>
+                                <span class="stat-icon">⏳</span>
+                            </div>
+                            <div class="stat-value" id="pendingInvestments">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investments Section -->
+            <div id="investmentsSection" class="admin-section" style="display: none;">
+                <div class="content-card">
+                    <h2>💼 Gestión de Inversiones</h2>
+                    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                        Administra y actualiza el estado de las inversiones
+                    </p>
+
+                    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-outline" onclick="filterAdminInvestments('all')" id="adminFilterAll">Todas</button>
+                        <button class="btn btn-outline" onclick="filterAdminInvestments('pending')" id="adminFilterPending">Pendientes</button>
+                        <button class="btn btn-outline" onclick="filterAdminInvestments('active')" id="adminFilterActive">Activas</button>
+                        <button class="btn btn-outline" onclick="filterAdminInvestments('completed')" id="adminFilterCompleted">Completadas</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="investment-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Activo</th>
+                                    <th>Monto USD</th>
+                                    <th>Cripto</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminInvestmentsTable">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 2rem;">
+                                        Cargando...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="usersSection" class="admin-section" style="display: none;">
+                <div class="content-card">
+                    <h2>👥 Gestión de Usuarios</h2>
+
+                    <div class="table-container">
+                        <table class="investment-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Inversiones</th>
+                                    <th>Capital Total</th>
+                                    <th>Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem;">
+                                        Cargando...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Config Section -->
+            <div id="configSection" class="admin-section" style="display: none;">
+                <div class="content-card">
+                    <h2>⚙️ Configuración</h2>
+
+                    <h3>Direcciones de Wallet</h3>
+                    <p style="color: var(--text-gray); margin-bottom: 1.5rem;">
+                        Configura las direcciones de wallet para recibir pagos
+                    </p>
+
+                    <div class="form-group">
+                        <label>Bitcoin (BTC)</label>
+                        <input type="text" id="walletBTC" placeholder="Dirección Bitcoin" style="font-family: monospace;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ethereum (ETH)</label>
+                        <input type="text" id="walletETH" placeholder="Dirección Ethereum" style="font-family: monospace;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>USDT (TRC-20)</label>
+                        <input type="text" id="walletUSDT" placeholder="Dirección USDT" style="font-family: monospace;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>USDC (ERC-20)</label>
+                        <input type="text" id="walletUSDC" placeholder="Dirección USDC" style="font-family: monospace;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Binance Coin (BNB)</label>
+                        <input type="text" id="walletBNB" placeholder="Dirección BNB" style="font-family: monospace;">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveWalletConfig()">
+                        Guardar Configuración
+                    </button>
+
+                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255, 215, 0, 0.2);">
+                        <h3>Herramientas</h3>
+                        <button class="btn btn-secondary" onclick="generateDemoData()">
+                            🎲 Generar Datos de Prueba
+                        </button>
+                        <button class="btn btn-outline" onclick="clearAllData()" style="margin-left: 1rem;">
+                            🗑️ Limpiar Todos los Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let currentAdminFilter = 'all';
+        let allAdminInvestments = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminData();
+            loadWalletConfig();
+        });
+
+        function loadAdminData() {
+            const stats = getUserStats();
+
+            document.getElementById('totalUsers').textContent = stats.totalUsers;
+            document.getElementById('totalInvestments').textContent = stats.totalInvestments;
+            document.getElementById('totalCapital').textContent = formatCurrency(stats.totalInvestedUSD);
+            document.getElementById('pendingInvestments').textContent = stats.pendingInvestments;
+
+            allAdminInvestments = getAllInvestments();
+            displayAdminInvestments();
+            displayUsers();
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.nav-list a').forEach(a => a.classList.remove('active'));
+
+            document.getElementById(`${section}Section`).style.display = 'block';
+            event.target.classList.add('active');
+
+            if (section === 'stats') loadAdminData();
+        }
+
+        function filterAdminInvestments(filter) {
+            currentAdminFilter = filter;
+            displayAdminInvestments();
+
+            document.querySelectorAll('[id^="adminFilter"]').forEach(btn => {
+                btn.style.background = '';
+                btn.style.color = '';
+            });
+
+            const activeBtn = document.getElementById(`adminFilter${filter.charAt(0).toUpperCase() + filter.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary-gold)';
+                activeBtn.style.color = 'var(--primary-dark)';
+            }
+        }
+
+        function displayAdminInvestments() {
+            const tbody = document.getElementById('adminInvestmentsTable');
+            const users = getAllUsers();
+
+            let filtered = currentAdminFilter === 'all' ?
+                allAdminInvestments :
+                allAdminInvestments.filter(inv => inv.status === currentAdminFilter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No hay inversiones para mostrar</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(inv => {
+                const user = users.find(u => u.id === inv.userId);
+                return `
+                    <tr>
+                        <td><code style="font-size: 0.75rem;">${inv.id.substring(0, 10)}...</code></td>
+                        <td>${user ? user.name : 'Desconocido'}<br>
+                            <span style="font-size: 0.875rem; color: var(--text-gray);">${user ? user.email : '-'}</span>
+                        </td>
+                        <td><strong>${inv.assetName}</strong></td>
+                        <td>${formatCurrency(inv.amountUSD)}</td>
+                        <td>${inv.amountCrypto} ${inv.cryptoType}</td>
+                        <td><span class="status-badge status-${inv.status}">${getStatusText(inv.status)}</span></td>
+                        <td>${formatDate(inv.createdAt)}</td>
+                        <td>
+                            ${inv.status === 'pending' ? `
+                                <button class="btn btn-primary" onclick="activateInvestment('${inv.id}')" style="padding: 6px 12px; font-size: 0.875rem;">
+                                    ✅ Activar
+                                </button>
+                            ` : inv.status === 'active' ? `
+                                <button class="btn btn-outline" onclick="viewInvestmentAdmin('${inv.id}')" style="padding: 6px 12px; font-size: 0.875rem;">
+                                    📊 Ver
+                                </button>
+                            ` : `
+                                <button class="btn btn-outline" onclick="viewInvestmentAdmin('${inv.id}')" style="padding: 6px 12px; font-size: 0.875rem;">
+                                    Ver
+                                </button>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('usersTable');
+            const users = getAllUsers();
+            const investments = getAllInvestments();
+
+            tbody.innerHTML = users.map(user => {
+                const userInvestments = investments.filter(inv => inv.userId === user.id);
+                const totalCapital = userInvestments.reduce((sum, inv) => sum + inv.amountUSD, 0);
+
+                return `
+                    <tr>
+                        <td><code style="font-size: 0.75rem;">${user.id.substring(0, 10)}...</code></td>
+                        <td><strong>${user.name}</strong></td>
+                        <td>${user.email}</td>
+                        <td>${user.phone || 'N/A'}</td>
+                        <td>${userInvestments.length}</td>
+                        <td>${formatCurrency(totalCapital)}</td>
+                        <td>${formatDate(user.registeredAt)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function activateInvestment(investmentId) {
+            if (!confirm('¿Confirmar la activación de esta inversión?\n\nEsto iniciará el conteo de retornos y pagos mensuales.')) {
+                return;
+            }
+
+            updateInvestmentStatus(investmentId, 'active');
+            showNotification('Inversión activada exitosamente', 'success');
+            loadAdminData();
+        }
+
+        function viewInvestmentAdmin(investmentId) {
+            const investment = allAdminInvestments.find(inv => inv.id === investmentId);
+            if (!investment) return;
+
+            alert(`ID: ${investment.id}\n` +
+                  `Activo: ${investment.assetName}\n` +
+                  `Monto: ${formatCurrency(investment.amountUSD)}\n` +
+                  `Estado: ${getStatusText(investment.status)}\n` +
+                  `Hash TX: ${investment.transactionHash || 'N/A'}`);
+        }
+
+        function loadWalletConfig() {
+            document.getElementById('walletBTC').value = WALLET_ADDRESSES.BTC;
+            document.getElementById('walletETH').value = WALLET_ADDRESSES.ETH;
+            document.getElementById('walletUSDT').value = WALLET_ADDRESSES.USDT;
+            document.getElementById('walletUSDC').value = WALLET_ADDRESSES.USDC;
+            document.getElementById('walletBNB').value = WALLET_ADDRESSES.BNB;
+        }
+
+        function saveWalletConfig() {
+            const newAddresses = {
+                BTC: document.getElementById('walletBTC').value.trim(),
+                ETH: document.getElementById('walletETH').value.trim(),
+                USDT: document.getElementById('walletUSDT').value.trim(),
+                USDC: document.getElementById('walletUSDC').value.trim(),
+                BNB: document.getElementById('walletBNB').value.trim()
+            };
+
+            // In production, save to backend
+            // For now, update the global variable
+            Object.assign(WALLET_ADDRESSES, newAddresses);
+            localStorage.setItem('walletAddresses', JSON.stringify(newAddresses));
+
+            showNotification('Configuración guardada. Actualiza app.js con las nuevas direcciones.', 'success');
+        }
+
+        function generateDemoData() {
+            if (!confirm('¿Generar datos de prueba? Esto creará un usuario demo con inversiones de ejemplo.')) {
+                return;
+            }
+
+            // Create demo user
+            const demoUser = {
+                id: generateUserId(),
+                name: 'Juan Demo',
+                email: 'demo@ejemplo.com',
+                phone: '+58 412-1234567',
+                password: 'demo123',
+                registeredAt: new Date().toISOString(),
+                kycVerified: false,
+                role: 'user'
+            };
+
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.push(demoUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Create demo investments
+            for (let i = 0; i < 3; i++) {
+                generateDemoInvestment(demoUser.id);
+            }
+
+            showNotification('Datos de prueba creados. Usuario: demo@ejemplo.com / Pass: demo123', 'success');
+            loadAdminData();
+        }
+
+        function clearAllData() {
+            if (!confirm('⚠️ ADVERTENCIA: Esto eliminará TODOS los datos (usuarios e inversiones).\n\n¿Estás seguro?')) {
+                return;
+            }
+
+            if (!confirm('¿REALMENTE estás seguro? Esta acción NO se puede deshacer.')) {
+                return;
+            }
+
+            localStorage.removeItem('users');
+            localStorage.removeItem('investments');
+            localStorage.removeItem('currentUser');
+
+            showNotification('Todos los datos han sido eliminados', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

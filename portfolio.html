@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Portafolio | Cripto Inversiones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-logo">💰 Cripto Inversiones</div>
+            <div class="dashboard-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+                <button class="btn btn-outline btn-logout" onclick="logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul class="nav-list">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="invest.html">Nueva Inversión</a></li>
+                <li><a href="portfolio.html" class="active">Mi Portafolio</a></li>
+                <li><a href="#" onclick="showProfile()">Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="dashboard-content">
+            <div class="content-card">
+                <h2>📊 Mi Portafolio de Inversiones</h2>
+                <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                    Resumen completo de todas tus inversiones y retornos
+                </p>
+
+                <!-- Portfolio Summary -->
+                <div class="stats-grid" style="margin-bottom: 3rem;">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Valor Total del Portafolio</span>
+                            <span class="stat-icon">💰</span>
+                        </div>
+                        <div class="stat-value" id="portfolioTotalValue">$0.00</div>
+                        <div class="stat-change positive">
+                            Capital + Retornos
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Capital Invertido</span>
+                            <span class="stat-icon">💵</span>
+                        </div>
+                        <div class="stat-value" id="portfolioInvested">$0.00</div>
+                        <div class="stat-change">
+                            Total depositado
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Retornos Generados</span>
+                            <span class="stat-icon">📈</span>
+                        </div>
+                        <div class="stat-value" id="portfolioReturns">$0.00</div>
+                        <div class="stat-change positive" id="portfolioReturnsPct">+0%</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Ingreso Mensual</span>
+                            <span class="stat-icon">💸</span>
+                        </div>
+                        <div class="stat-value" id="portfolioMonthly">$0.00</div>
+                        <div class="stat-change">
+                            Promedio estimado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Distribution -->
+                <h3 style="margin-bottom: 1.5rem;">Distribución por Activo</h3>
+                <div id="assetDistribution" style="margin-bottom: 3rem;">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- All Investments -->
+            <div class="content-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2>Todas las Inversiones</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-outline" onclick="filterInvestments('all')" id="filterAll">Todas</button>
+                        <button class="btn btn-outline" onclick="filterInvestments('active')" id="filterActive">Activas</button>
+                        <button class="btn btn-outline" onclick="filterInvestments('pending')" id="filterPending">Pendientes</button>
+                        <button class="btn btn-outline" onclick="filterInvestments('completed')" id="filterCompleted">Completadas</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="investment-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Activo</th>
+                                <th>Monto Invertido</th>
+                                <th>Retorno Acumulado</th>
+                                <th>Retorno %</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="investmentsTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 2rem;">
+                                    Cargando inversiones...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Investment Detail Modal -->
+    <div id="investmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="content-card" style="max-width: 700px; margin: 2rem auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>Detalle de Inversión</h2>
+                    <button class="btn btn-outline" onclick="closeModal()" style="padding: 8px 16px;">✕</button>
+                </div>
+
+                <div id="modalContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let currentFilter = 'all';
+        let allInvestments = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+                loadPortfolio(user);
+            }
+        });
+
+        function loadPortfolio(user) {
+            allInvestments = getUserInvestments(user.id);
+            updatePortfolioSummary();
+            updateAssetDistribution();
+            displayInvestments();
+        }
+
+        function updatePortfolioSummary() {
+            const user = getCurrentUser();
+            const summary = getPortfolioSummary(user.id);
+
+            document.getElementById('portfolioTotalValue').textContent = formatCurrency(summary.totalValue);
+            document.getElementById('portfolioInvested').textContent = formatCurrency(summary.totalInvested);
+            document.getElementById('portfolioReturns').textContent = formatCurrency(summary.totalReturns);
+            document.getElementById('portfolioMonthly').textContent = formatCurrency(summary.monthlyIncome);
+
+            const returnsPct = summary.totalInvested > 0 ?
+                ((summary.totalReturns / summary.totalInvested) * 100).toFixed(2) : 0;
+            document.getElementById('portfolioReturnsPct').textContent = `+${returnsPct}%`;
+        }
+
+        function updateAssetDistribution() {
+            const user = getCurrentUser();
+            const summary = getPortfolioSummary(user.id);
+            const container = document.getElementById('assetDistribution');
+
+            if (Object.keys(summary.assetDistribution).length === 0) {
+                container.innerHTML = '<p style="color: var(--text-gray); text-align: center;">No hay inversiones para mostrar</p>';
+                return;
+            }
+
+            const total = summary.totalInvested;
+
+            container.innerHTML = Object.entries(summary.assetDistribution).map(([asset, amount]) => {
+                const percentage = ((amount / total) * 100).toFixed(1);
+                return `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-light); font-weight: 600;">${asset}</span>
+                            <span style="color: var(--primary-gold);">${formatCurrency(amount)} (${percentage}%)</span>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); height: 12px; border-radius: 6px; overflow: hidden;">
+                            <div style="background: var(--gradient-primary); height: 100%; width: ${percentage}%; transition: width 0.5s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterInvestments(filter) {
+            currentFilter = filter;
+
+            // Update button states
+            document.querySelectorAll('.btn-outline').forEach(btn => {
+                btn.style.background = '';
+                btn.style.color = '';
+            });
+
+            const activeBtn = document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary-gold)';
+                activeBtn.style.color = 'var(--primary-dark)';
+            }
+
+            displayInvestments();
+        }
+
+        function displayInvestments() {
+            const tbody = document.getElementById('investmentsTableBody');
+
+            let filtered = allInvestments;
+            if (currentFilter !== 'all') {
+                filtered = allInvestments.filter(inv => inv.status === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <h3>No hay inversiones ${currentFilter !== 'all' ? currentFilter + 's' : ''}</h3>
+                                <p>Comienza a invertir para ver tu portafolio crecer</p>
+                                <a href="invest.html" class="btn btn-primary">Nueva Inversión</a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(inv => {
+                const returns = calculateReturns(inv);
+                const returnsPct = inv.amountUSD > 0 ? ((returns / inv.amountUSD) * 100).toFixed(2) : 0;
+
+                return `
+                    <tr>
+                        <td>
+                            <code style="font-size: 0.75rem; color: var(--text-gray);">
+                                ${inv.id.substring(0, 12)}...
+                            </code>
+                        </td>
+                        <td>
+                            <strong>${inv.assetName}</strong><br>
+                            <span style="font-size: 0.875rem; color: var(--text-gray);">${inv.assetType}</span>
+                        </td>
+                        <td>
+                            ${formatCurrency(inv.amountUSD)}<br>
+                            <span style="font-size: 0.875rem; color: var(--text-gray);">
+                                ${inv.amountCrypto} ${inv.cryptoType}
+                            </span>
+                        </td>
+                        <td>
+                            <strong style="color: var(--success-green);">${formatCurrency(returns)}</strong>
+                        </td>
+                        <td>
+                            <strong style="color: var(--success-green);">+${returnsPct}%</strong><br>
+                            <span style="font-size: 0.875rem; color: var(--text-gray);">
+                                de ${inv.expectedReturn}% anual
+                            </span>
+                        </td>
+                        <td>${formatDate(inv.startDate)}</td>
+                        <td>${formatDate(inv.endDate)}</td>
+                        <td>
+                            <span class="status-badge status-${inv.status}">
+                                ${getStatusText(inv.status)}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline" onclick="viewInvestmentDetail('${inv.id}')" style="padding: 6px 12px; font-size: 0.875rem;">
+                                Ver Detalle
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewInvestmentDetail(investmentId) {
+            const investment = allInvestments.find(inv => inv.id === investmentId);
+            if (!investment) return;
+
+            const returns = calculateReturns(investment);
+            const returnsPct = investment.amountUSD > 0 ? ((returns / investment.amountUSD) * 100).toFixed(2) : 0;
+            const progress = investment.duration > 0 ?
+                Math.min(((new Date() - new Date(investment.startDate)) / (1000 * 60 * 60 * 24 * 30) / investment.duration * 100), 100).toFixed(1) : 0;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="payment-summary">
+                    <h3 style="margin-bottom: 1rem;">Información General</h3>
+                    <div class="summary-row">
+                        <span class="summary-label">ID de Inversión:</span>
+                        <span class="summary-value" style="font-size: 0.875rem; font-family: monospace;">${investment.id}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Activo:</span>
+                        <span class="summary-value">${investment.assetName}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Tipo:</span>
+                        <span class="summary-value">${investment.assetType}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Estado:</span>
+                        <span class="status-badge status-${investment.status}">${getStatusText(investment.status)}</span>
+                    </div>
+                </div>
+
+                <div class="payment-summary" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Montos</h3>
+                    <div class="summary-row">
+                        <span class="summary-label">Monto Invertido:</span>
+                        <span class="summary-value">${formatCurrency(investment.amountUSD)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">En Criptomoneda:</span>
+                        <span class="summary-value">${investment.amountCrypto} ${investment.cryptoType}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Retorno Acumulado:</span>
+                        <span class="summary-value" style="color: var(--success-green);">${formatCurrency(returns)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Retorno %:</span>
+                        <span class="summary-value" style="color: var(--success-green);">+${returnsPct}%</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Retorno Mensual:</span>
+                        <span class="summary-value">${formatCurrency(investment.monthlyReturn || 0)}</span>
+                    </div>
+                </div>
+
+                <div class="payment-summary" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Fechas y Plazos</h3>
+                    <div class="summary-row">
+                        <span class="summary-label">Fecha de Registro:</span>
+                        <span class="summary-value">${formatDateTime(investment.createdAt)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Fecha de Inicio:</span>
+                        <span class="summary-value">${formatDateTime(investment.startDate)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Fecha de Vencimiento:</span>
+                        <span class="summary-value">${formatDateTime(investment.endDate)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Duración:</span>
+                        <span class="summary-value">${investment.duration} meses</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Próximo Pago:</span>
+                        <span class="summary-value">${formatDate(investment.nextPaymentDate)}</span>
+                    </div>
+                </div>
+
+                ${investment.status === 'active' ? `
+                <div style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Progreso</h3>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-gray);">Tiempo Transcurrido</span>
+                        <span style="color: var(--primary-gold); font-weight: 600;">${progress}%</span>
+                    </div>
+                    <div style="background: rgba(255, 215, 0, 0.1); height: 20px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: var(--gradient-primary); height: 100%; width: ${progress}%; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="payment-summary" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Información de Transacción</h3>
+                    <div class="summary-row">
+                        <span class="summary-label">Hash de TX:</span>
+                        <span class="summary-value" style="font-size: 0.75rem; font-family: monospace; word-break: break-all;">
+                            ${investment.transactionHash || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Wallet Destino:</span>
+                        <span class="summary-value" style="font-size: 0.75rem; font-family: monospace; word-break: break-all;">
+                            ${investment.walletAddress || 'N/A'}
+                        </span>
+                    </div>
+                </div>
+
+                ${investment.paymentHistory && investment.paymentHistory.length > 0 ? `
+                <div style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Historial de Pagos</h3>
+                    <div class="table-container">
+                        <table class="investment-table" style="font-size: 0.875rem;">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>TX Hash</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${investment.paymentHistory.map(payment => `
+                                    <tr>
+                                        <td>${formatDateTime(payment.date)}</td>
+                                        <td>${formatCurrency(payment.amount)}</td>
+                                        <td style="font-family: monospace; font-size: 0.75rem;">
+                                            ${payment.transactionHash ? payment.transactionHash.substring(0, 20) + '...' : 'N/A'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="closeModal()">Cerrar</button>
+                </div>
+            `;
+
+            document.getElementById('investmentModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('investmentModal').style.display = 'none';
+        }
+
+        function showProfile() {
+            showNotification('Función de perfil en desarrollo', 'info');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('investmentModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            margin: 0 auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+    </style>
+</body>
+</html>

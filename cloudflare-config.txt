@@ -1,0 +1,201 @@
+# ===================================
+# CONFIGURACIÓN CLOUDFLARE PASO A PASO
+# ===================================
+
+## PASO 1: CREAR CUENTA
+1. Ve a: https://www.cloudflare.com/
+2. Sign Up → Email + Password
+3. Verifica email
+
+## PASO 2: AGREGAR SITIO
+1. Click "Add a Site"
+2. Ingresa: tudominio.com
+3. Selecciona plan FREE
+4. Click "Continue"
+
+## PASO 3: CAMBIAR NAMESERVERS
+Cloudflare te dará 2 nameservers, ejemplo:
+→ alex.ns.cloudflare.com
+→ maya.ns.cloudflare.com
+
+Ve donde compraste tu dominio y:
+- GoDaddy: Domain Settings → Nameservers → Change → Custom
+- Namecheap: Domain List → Manage → Nameservers → Custom DNS
+- Hostinger: Domains → Manage → DNS/Nameservers
+
+Ingresa los 2 nameservers de Cloudflare.
+
+⏰ Espera 24-48 horas para propagación
+
+## PASO 4: CONFIGURAR DNS
+En Cloudflare:
+
+DNS → Records → Agregar:
+
+A Record:
+- Name: @
+- IPv4: [IP_DE_TU_SERVIDOR]
+- Proxy: ☁️ ON (NARANJA)
+- TTL: Auto
+
+A Record:
+- Name: www
+- IPv4: [IP_DE_TU_SERVIDOR]
+- Proxy: ☁️ ON (NARANJA)
+- TTL: Auto
+
+⚠️ IMPORTANTE: La nube NARANJA oculta tu IP
+
+## PASO 5: SSL/TLS
+SSL/TLS → Overview:
+- Encryption mode: Full (strict)
+
+SSL/TLS → Edge Certificates:
+- Always Use HTTPS: ON
+- HTTP Strict Transport Security (HSTS): Enable
+- Minimum TLS Version: TLS 1.2
+- Opportunistic Encryption: ON
+- TLS 1.3: ON
+- Automatic HTTPS Rewrites: ON
+- Certificate Transparency Monitoring: ON
+
+## PASO 6: FIREWALL RULES
+Security → WAF → Firewall Rules → Create Firewall Rule
+
+Regla 1: Bloquear Países Sospechosos
+- Name: Block Suspicious Countries
+- Field: Country
+- Operator: does not equal
+- Value: US,ES,MX,AR,CL,CO,PE,VE (tus países objetivo)
+- Action: Block
+- Save
+
+Regla 2: Bloquear Bots
+- Name: Block Bad Bots
+- Field: Threat Score
+- Operator: greater than
+- Value: 10
+- Action: Challenge (CAPTCHA)
+- Save
+
+Regla 3: Proteger Admin
+- Name: Protect Admin Panel
+- Field: URI Path
+- Operator: equals
+- Value: /admin.html
+- Action: Challenge (CAPTCHA)
+- Save
+
+## PASO 7: SECURITY LEVEL
+Security → Settings:
+- Security Level: Medium
+- Challenge Passage: 30 minutes
+- Browser Integrity Check: ON
+- Privacy Pass Support: ON
+
+## PASO 8: SCRAPE SHIELD
+Scrape Shield:
+- Email Address Obfuscation: ON
+- Server-side Excludes: ON
+- Hotlink Protection: ON
+
+## PASO 9: SPEED
+Speed → Optimization:
+
+Auto Minify:
+- ☑ JavaScript
+- ☑ CSS
+- ☑ HTML
+
+Brotli: ON
+Rocket Loader: OFF (puede causar problemas)
+Early Hints: ON
+
+## PASO 10: CACHING
+Caching → Configuration:
+- Caching Level: Standard
+- Browser Cache TTL: 4 hours
+
+## PASO 11: PAGE RULES (Opcional)
+Rules → Page Rules → Create Page Rule
+
+Regla 1:
+- URL: tudominio.com/*
+- Settings:
+  - Always Use HTTPS: ON
+  - Browser Cache TTL: 4 hours
+  - Security Level: Medium
+
+## PASO 12: VERIFICAR
+Después de 24-48 horas:
+
+1. Verifica SSL:
+   https://www.ssllabs.com/ssltest/analyze.html?d=tudominio.com
+
+2. Verifica que tu IP esté oculta:
+   https://www.whatsmydns.net/#A/tudominio.com
+   (Debería mostrar IPs de Cloudflare, NO tu IP real)
+
+3. Verifica headers:
+   https://securityheaders.com/?q=tudominio.com
+
+4. Verifica Cloudflare activo:
+   Abre tu sitio → F12 → Network → Refresh
+   Busca header: "cf-ray" (si existe = Cloudflare activo)
+
+## ✅ CHECKLIST COMPLETO
+
+- [ ] Cuenta Cloudflare creada
+- [ ] Sitio agregado
+- [ ] Nameservers cambiados
+- [ ] Propagación completada (24-48h)
+- [ ] DNS en modo Proxy (naranja)
+- [ ] SSL Full Strict configurado
+- [ ] HTTPS forzado
+- [ ] Firewall rules creadas
+- [ ] Security level configurado
+- [ ] Scrape Shield activado
+- [ ] Optimización activada
+- [ ] Verificaciones completadas
+
+## 🎯 RESULTADO FINAL
+
+Tu sitio ahora:
+✅ Oculta tu IP real completamente
+✅ Protegido contra DDoS (hasta 100+ Gbps)
+✅ SSL automático y renovación
+✅ CDN global (sitio más rápido)
+✅ Firewall contra ataques
+✅ Bot protection
+✅ Panel de analytics gratis
+
+## 📞 SOPORTE CLOUDFLARE
+
+Si tienes problemas:
+- Docs: https://developers.cloudflare.com/
+- Community: https://community.cloudflare.com/
+- Email: support@cloudflare.com (respuesta en 24-48h)
+
+## ⚡ TIPS AVANZADOS
+
+1. Habilita "Under Attack Mode" si detectas ataque DDoS:
+   Security → Settings → Security Level → I'm Under Attack
+
+2. Revisa Analytics diariamente:
+   Analytics & Logs → Web Analytics
+
+3. Configura notificaciones de eventos:
+   Notifications → Add
+
+4. Backup de configuración:
+   Toma screenshots de todas tus settings
+
+## 🔒 SEGURIDAD ADICIONAL
+
+Con Cloudflare + .htaccess + security.js que creamos:
+→ Tu sitio es BUNKER DIGITAL
+→ IP 100% oculta
+→ Protección multicapa
+→ Resistente a ataques IA y humanos
+
+¡TU SITIO ESTÁ BLINDADO! 🛡️
