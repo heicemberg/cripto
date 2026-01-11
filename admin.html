@@ -24,6 +24,7 @@
                 <li><a href="#" onclick="showSection('stats')" class="active">Estadísticas</a></li>
                 <li><a href="#" onclick="showSection('investments')">Inversiones</a></li>
                 <li><a href="#" onclick="showSection('users')">Usuarios</a></li>
+                <li><a href="#" onclick="showSection('returns')">Porcentajes de Retorno</a></li>
                 <li><a href="#" onclick="showSection('config')">Configuración</a></li>
             </ul>
         </nav>
@@ -142,6 +143,139 @@
                 </div>
             </div>
 
+            <!-- Returns Configuration Section -->
+            <div id="returnsSection" class="admin-section" style="display: none;">
+                <div class="content-card">
+                    <h2>📊 Configuración de Porcentajes de Retorno</h2>
+                    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                        Ajusta los porcentajes de retorno anual, duración y monto mínimo para cada tipo de activo.
+                        <strong style="color: var(--primary-gold);">Los cambios afectan solo a nuevas inversiones.</strong>
+                    </p>
+
+                    <div id="assetConfigGrid" style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+                        <!-- Gold Configuration -->
+                        <div class="content-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--primary-gold);">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                                <span style="font-size: 3rem;">🪙</span>
+                                <div>
+                                    <h3 style="margin: 0;">Oro y Minerales Preciosos</h3>
+                                    <p style="color: var(--text-gray); margin: 0.25rem 0 0 0; font-size: 0.875rem;">Metales Preciosos</p>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                                <div class="form-group">
+                                    <label>Retorno Anual (%)</label>
+                                    <input type="number" id="goldReturn" step="0.1" min="0" max="100" placeholder="15">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duración (meses)</label>
+                                    <input type="number" id="goldDuration" min="1" max="120" placeholder="12">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inversión Mínima (BTC)</label>
+                                    <input type="number" id="goldMinInvestment" step="0.001" min="0" placeholder="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Oil Configuration -->
+                        <div class="content-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--primary-gold);">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                                <span style="font-size: 3rem;">⚡</span>
+                                <div>
+                                    <h3 style="margin: 0;">Petróleo y Derivados</h3>
+                                    <p style="color: var(--text-gray); margin: 0.25rem 0 0 0; font-size: 0.875rem;">Energía</p>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                                <div class="form-group">
+                                    <label>Retorno Anual (%)</label>
+                                    <input type="number" id="oilReturn" step="0.1" min="0" max="100" placeholder="22">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duración (meses)</label>
+                                    <input type="number" id="oilDuration" min="1" max="120" placeholder="18">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inversión Mínima (BTC)</label>
+                                    <input type="number" id="oilMinInvestment" step="0.001" min="0" placeholder="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Silver Configuration -->
+                        <div class="content-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--primary-gold);">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                                <span style="font-size: 3rem;">💎</span>
+                                <div>
+                                    <h3 style="margin: 0;">Plata y Metales Estratégicos</h3>
+                                    <p style="color: var(--text-gray); margin: 0.25rem 0 0 0; font-size: 0.875rem;">Metales Estratégicos</p>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                                <div class="form-group">
+                                    <label>Retorno Anual (%)</label>
+                                    <input type="number" id="silverReturn" step="0.1" min="0" max="100" placeholder="18">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duración (meses)</label>
+                                    <input type="number" id="silverDuration" min="1" max="120" placeholder="12">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inversión Mínima (BTC)</label>
+                                    <input type="number" id="silverMinInvestment" step="0.001" min="0" placeholder="0.08">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Materials Configuration -->
+                        <div class="content-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--primary-gold);">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                                <span style="font-size: 3rem;">🏭</span>
+                                <div>
+                                    <h3 style="margin: 0;">Materiales Industriales</h3>
+                                    <p style="color: var(--text-gray); margin: 0.25rem 0 0 0; font-size: 0.875rem;">Commodities</p>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                                <div class="form-group">
+                                    <label>Retorno Anual (%)</label>
+                                    <input type="number" id="materialsReturn" step="0.1" min="0" max="100" placeholder="12">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duración (meses)</label>
+                                    <input type="number" id="materialsDuration" min="1" max="120" placeholder="24">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inversión Mínima (BTC)</label>
+                                    <input type="number" id="materialsMinInvestment" step="0.001" min="0" placeholder="0.2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 2rem; background: rgba(255, 215, 0, 0.05); border-radius: 10px; margin-bottom: 1.5rem;">
+                        <p style="color: var(--text-gray); margin-bottom: 1rem;">
+                            ⚠️ <strong>Importante:</strong> Los cambios en los porcentajes solo afectarán a las nuevas inversiones.
+                            Las inversiones activas mantendrán sus porcentajes originales.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button class="btn btn-primary" onclick="saveReturnsConfiguration()" style="padding: 1rem 3rem;">
+                            💾 Guardar Configuración
+                        </button>
+                        <button class="btn btn-outline" onclick="loadReturnsConfiguration()" style="padding: 1rem 3rem;">
+                            🔄 Recargar Valores
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Config Section -->
             <div id="configSection" class="admin-section" style="display: none;">
                 <div class="content-card">
@@ -204,6 +338,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadAdminData();
             loadWalletConfig();
+            loadReturnsConfiguration();
         });
 
         function loadAdminData() {
@@ -407,6 +542,98 @@
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
+        }
+
+        // ===================================
+        // Returns Configuration Functions
+        // ===================================
+
+        function loadReturnsConfiguration() {
+            const configs = getAssetConfigurations();
+
+            // Load gold config
+            document.getElementById('goldReturn').value = configs.gold.expectedReturn;
+            document.getElementById('goldDuration').value = configs.gold.duration;
+            document.getElementById('goldMinInvestment').value = configs.gold.minInvestment;
+
+            // Load oil config
+            document.getElementById('oilReturn').value = configs.oil.expectedReturn;
+            document.getElementById('oilDuration').value = configs.oil.duration;
+            document.getElementById('oilMinInvestment').value = configs.oil.minInvestment;
+
+            // Load silver config
+            document.getElementById('silverReturn').value = configs.silver.expectedReturn;
+            document.getElementById('silverDuration').value = configs.silver.duration;
+            document.getElementById('silverMinInvestment').value = configs.silver.minInvestment;
+
+            // Load materials config
+            document.getElementById('materialsReturn').value = configs.materials.expectedReturn;
+            document.getElementById('materialsDuration').value = configs.materials.duration;
+            document.getElementById('materialsMinInvestment').value = configs.materials.minInvestment;
+        }
+
+        function saveReturnsConfiguration() {
+            // Gather all configurations
+            const configs = {
+                gold: {
+                    expectedReturn: parseFloat(document.getElementById('goldReturn').value),
+                    duration: parseInt(document.getElementById('goldDuration').value),
+                    minInvestment: parseFloat(document.getElementById('goldMinInvestment').value)
+                },
+                oil: {
+                    expectedReturn: parseFloat(document.getElementById('oilReturn').value),
+                    duration: parseInt(document.getElementById('oilDuration').value),
+                    minInvestment: parseFloat(document.getElementById('oilMinInvestment').value)
+                },
+                silver: {
+                    expectedReturn: parseFloat(document.getElementById('silverReturn').value),
+                    duration: parseInt(document.getElementById('silverDuration').value),
+                    minInvestment: parseFloat(document.getElementById('silverMinInvestment').value)
+                },
+                materials: {
+                    expectedReturn: parseFloat(document.getElementById('materialsReturn').value),
+                    duration: parseInt(document.getElementById('materialsDuration').value),
+                    minInvestment: parseFloat(document.getElementById('materialsMinInvestment').value)
+                }
+            };
+
+            // Validate
+            let valid = true;
+            Object.keys(configs).forEach(key => {
+                if (isNaN(configs[key].expectedReturn) || configs[key].expectedReturn < 0 || configs[key].expectedReturn > 100) {
+                    showNotification(`Error: Retorno de ${key} debe estar entre 0 y 100`, 'error');
+                    valid = false;
+                }
+                if (isNaN(configs[key].duration) || configs[key].duration < 1) {
+                    showNotification(`Error: Duración de ${key} debe ser mayor a 0`, 'error');
+                    valid = false;
+                }
+                if (isNaN(configs[key].minInvestment) || configs[key].minInvestment < 0) {
+                    showNotification(`Error: Inversión mínima de ${key} debe ser mayor o igual a 0`, 'error');
+                    valid = false;
+                }
+            });
+
+            if (!valid) return;
+
+            // Save
+            if (saveAssetConfigurations(configs)) {
+                showNotification('✅ Configuración de retornos guardada exitosamente. Los cambios aplicarán a nuevas inversiones.', 'success');
+
+                // Show summary
+                setTimeout(() => {
+                    const summary = `
+📊 Resumen de Configuración:
+• Oro: ${configs.gold.expectedReturn}% anual (${configs.gold.duration} meses)
+• Petróleo: ${configs.oil.expectedReturn}% anual (${configs.oil.duration} meses)
+• Plata: ${configs.silver.expectedReturn}% anual (${configs.silver.duration} meses)
+• Materiales: ${configs.materials.expectedReturn}% anual (${configs.materials.duration} meses)
+                    `.trim();
+                    alert(summary);
+                }, 500);
+            } else {
+                showNotification('Error al guardar la configuración', 'error');
+            }
         }
     </script>
 </body>

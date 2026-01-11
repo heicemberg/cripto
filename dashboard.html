@@ -56,6 +56,17 @@
                     <div class="stat-change positive" id="returnsPercentage">+0%</div>
                 </div>
 
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(0, 255, 127, 0.05) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--success-green);">
+                    <div class="stat-header">
+                        <span class="stat-label">Ganancia Diaria</span>
+                        <span class="stat-icon">💵</span>
+                    </div>
+                    <div class="stat-value" id="dailyEarnings" style="color: var(--success-green);">$0.00</div>
+                    <div class="stat-change positive">
+                        <span id="dailyEarningsDetail">Generándose ahora</span>
+                    </div>
+                </div>
+
                 <div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-label">Inversiones Activas</span>
@@ -63,15 +74,6 @@
                     </div>
                     <div class="stat-value" id="activeInvestments">0</div>
                     <div class="stat-change">Actualmente en operación</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Próximo Pago</span>
-                        <span class="stat-icon">📅</span>
-                    </div>
-                    <div class="stat-value" id="nextPayment" style="font-size: 1.5rem;">--</div>
-                    <div class="stat-change" id="nextPaymentAmount">$0.00</div>
                 </div>
             </div>
 
@@ -165,28 +167,27 @@
             // Calculate totals
             let totalInvested = 0;
             let totalReturns = 0;
+            let dailyEarnings = 0;
 
             activeInvestments.forEach(inv => {
                 totalInvested += inv.amountUSD;
                 totalReturns += calculateReturns(inv);
+                dailyEarnings += calculateDailyReturn(inv);
             });
 
             // Update UI
             document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
             document.getElementById('totalReturns').textContent = formatCurrency(totalReturns);
             document.getElementById('activeInvestments').textContent = activeInvestments.length;
+            document.getElementById('dailyEarnings').textContent = formatCurrency(dailyEarnings);
 
             const returnsPercentage = totalInvested > 0 ? ((totalReturns / totalInvested) * 100).toFixed(2) : 0;
             document.getElementById('returnsPercentage').textContent = `+${returnsPercentage}%`;
 
-            // Next payment
-            if (activeInvestments.length > 0) {
-                const nextInv = activeInvestments.sort((a, b) =>
-                    new Date(a.nextPaymentDate) - new Date(b.nextPaymentDate)
-                )[0];
-                document.getElementById('nextPayment').textContent = formatDate(nextInv.nextPaymentDate);
-                document.getElementById('nextPaymentAmount').textContent = formatCurrency(nextInv.monthlyReturn);
-            }
+            // Update daily earnings detail
+            const monthlyFromDaily = dailyEarnings * 30;
+            document.getElementById('dailyEarningsDetail').textContent =
+                dailyEarnings > 0 ? `≈ ${formatCurrency(monthlyFromDaily)}/mes` : 'Sin inversiones activas';
         }
 
         function displayRecentInvestments(investments) {

@@ -183,20 +183,57 @@ function updateInvestmentStatus(investmentId, status, additionalData = {}) {
     return null;
 }
 
-// Calculate returns for an investment
+// Calculate returns for an investment (UPDATED: Now calculates daily returns)
 function calculateReturns(investment) {
     if (investment.status !== 'active') return 0;
 
     const startDate = new Date(investment.startDate);
     const now = new Date();
-    const monthsElapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24 * 30));
+    const daysElapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
 
-    if (monthsElapsed <= 0) return 0;
+    if (daysElapsed <= 0) return 0;
 
-    const monthlyReturnRate = investment.expectedReturn / 12 / 100;
-    const totalReturn = investment.amountUSD * monthlyReturnRate * monthsElapsed;
+    // Calculate daily return rate from annual expected return
+    const dailyReturnRate = investment.expectedReturn / 365 / 100;
+    const totalReturn = investment.amountUSD * dailyReturnRate * daysElapsed;
 
-    return Math.min(totalReturn, investment.amountUSD * (investment.expectedReturn / 100));
+    // Cap at maximum expected return
+    const maxReturn = investment.amountUSD * (investment.expectedReturn / 100);
+    return Math.min(totalReturn, maxReturn);
+}
+
+// Calculate daily return for an investment
+function calculateDailyReturn(investment) {
+    if (investment.status !== 'active') return 0;
+
+    const dailyReturnRate = investment.expectedReturn / 365 / 100;
+    return investment.amountUSD * dailyReturnRate;
+}
+
+// Get daily earnings history for an investment
+function getDailyEarningsHistory(investment, days = 30) {
+    if (investment.status !== 'active') return [];
+
+    const history = [];
+    const startDate = new Date(investment.startDate);
+    const now = new Date();
+    const daysElapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+
+    const dailyReturn = calculateDailyReturn(investment);
+    const daysToShow = Math.min(days, daysElapsed);
+
+    for (let i = daysToShow - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+
+        history.push({
+            date: date.toISOString(),
+            amount: dailyReturn,
+            cumulative: dailyReturn * (daysElapsed - i)
+        });
+    }
+
+    return history;
 }
 
 // Add payment to investment
@@ -421,6 +458,67 @@ function getUserStats() {
         pendingInvestments: investments.filter(inv => inv.status === 'pending').length
     };
 }
+
+// ===================================
+// Asset Configuration (Admin)
+// ===================================
+
+// Get custom asset configurations
+function getAssetConfigurations() {
+    const saved = localStorage.getItem('assetConfigurations');
+    if (saved) {
+        return JSON.parse(saved);
+    }
+
+    // Return default configurations
+    return {
+        gold: { expectedReturn: 15, duration: 12, minInvestment: 0.1 },
+        oil: { expectedReturn: 22, duration: 18, minInvestment: 0.5 },
+        silver: { expectedReturn: 18, duration: 12, minInvestment: 0.08 },
+        materials: { expectedReturn: 12, duration: 24, minInvestment: 0.2 }
+    };
+}
+
+// Save asset configurations
+function saveAssetConfigurations(configs) {
+    localStorage.setItem('assetConfigurations', JSON.stringify(configs));
+
+    // Update AVAILABLE_ASSETS with new configurations
+    Object.keys(configs).forEach(assetId => {
+        if (AVAILABLE_ASSETS[assetId]) {
+            AVAILABLE_ASSETS[assetId].expectedReturn = configs[assetId].expectedReturn;
+            AVAILABLE_ASSETS[assetId].duration = configs[assetId].duration;
+            AVAILABLE_ASSETS[assetId].minInvestment = configs[assetId].minInvestment;
+        }
+    });
+
+    return true;
+}
+
+// Update return percentage for specific asset
+function updateAssetReturn(assetId, newReturnPercentage) {
+    const configs = getAssetConfigurations();
+
+    if (configs[assetId]) {
+        configs[assetId].expectedReturn = parseFloat(newReturnPercentage);
+        saveAssetConfigurations(configs);
+        return true;
+    }
+
+    return false;
+}
+
+// Initialize configurations on page load
+(function initializeConfigurations() {
+    const configs = getAssetConfigurations();
+    Object.keys(configs).forEach(assetId => {
+        if (AVAILABLE_ASSETS[assetId]) {
+            AVAILABLE_ASSETS[assetId].expectedReturn = configs[assetId].expectedReturn;
+            AVAILABLE_ASSETS[assetId].duration = configs[assetId].duration;
+            AVAILABLE_ASSETS[assetId].minInvestment = configs[assetId].minInvestment;
+        }
+    });
+})();
 
 // ===================================
 // Export for use in HTML

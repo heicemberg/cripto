@@ -73,14 +73,14 @@
                         <div class="stat-change positive" id="portfolioReturnsPct">+0%</div>
                     </div>
 
-                    <div class="stat-card">
+                    <div class="stat-card" style="background: linear-gradient(135deg, rgba(0, 255, 127, 0.05) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--success-green);">
                         <div class="stat-header">
-                            <span class="stat-label">Ingreso Mensual</span>
-                            <span class="stat-icon">💸</span>
+                            <span class="stat-label">Ganancia Diaria</span>
+                            <span class="stat-icon">📅</span>
                         </div>
-                        <div class="stat-value" id="portfolioMonthly">$0.00</div>
-                        <div class="stat-change">
-                            Promedio estimado
+                        <div class="stat-value" id="portfolioDaily" style="color: var(--success-green);">$0.00</div>
+                        <div class="stat-change positive">
+                            Generándose ahora
                         </div>
                     </div>
                 </div>
@@ -111,6 +111,7 @@
                                 <th>ID</th>
                                 <th>Activo</th>
                                 <th>Monto Invertido</th>
+                                <th>Ganancia Diaria</th>
                                 <th>Retorno Acumulado</th>
                                 <th>Retorno %</th>
                                 <th>Fecha Inicio</th>
@@ -121,7 +122,7 @@
                         </thead>
                         <tbody id="investmentsTableBody">
                             <tr>
-                                <td colspan="9" style="text-align: center; padding: 2rem;">
+                                <td colspan="10" style="text-align: center; padding: 2rem;">
                                     Cargando inversiones...
                                 </td>
                             </tr>
@@ -174,10 +175,16 @@
             const user = getCurrentUser();
             const summary = getPortfolioSummary(user.id);
 
+            // Calculate daily income from active investments
+            let dailyIncome = 0;
+            allInvestments.filter(inv => inv.status === 'active').forEach(inv => {
+                dailyIncome += calculateDailyReturn(inv);
+            });
+
             document.getElementById('portfolioTotalValue').textContent = formatCurrency(summary.totalValue);
             document.getElementById('portfolioInvested').textContent = formatCurrency(summary.totalInvested);
             document.getElementById('portfolioReturns').textContent = formatCurrency(summary.totalReturns);
-            document.getElementById('portfolioMonthly').textContent = formatCurrency(summary.monthlyIncome);
+            document.getElementById('portfolioDaily').textContent = formatCurrency(dailyIncome);
 
             const returnsPct = summary.totalInvested > 0 ?
                 ((summary.totalReturns / summary.totalInvested) * 100).toFixed(2) : 0;
@@ -241,7 +248,7 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9">
+                        <td colspan="10">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📭</div>
                                 <h3>No hay inversiones ${currentFilter !== 'all' ? currentFilter + 's' : ''}</h3>
@@ -256,6 +263,7 @@
 
             tbody.innerHTML = filtered.map(inv => {
                 const returns = calculateReturns(inv);
+                const dailyReturn = calculateDailyReturn(inv);
                 const returnsPct = inv.amountUSD > 0 ? ((returns / inv.amountUSD) * 100).toFixed(2) : 0;
 
                 return `
@@ -274,6 +282,10 @@
                             <span style="font-size: 0.875rem; color: var(--text-gray);">
                                 ${inv.amountCrypto} ${inv.cryptoType}
                             </span>
+                        </td>
+                        <td>
+                            <strong style="color: var(--success-green);">${formatCurrency(dailyReturn)}</strong><br>
+                            <span style="font-size: 0.75rem; color: var(--text-gray);">por día</span>
                         </td>
                         <td>
                             <strong style="color: var(--success-green);">${formatCurrency(returns)}</strong>
